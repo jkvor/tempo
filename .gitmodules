@@ -7,3 +7,6 @@
 [submodule "vendor/node-static"]
 	path = vendor/node-static
 	url = http://github.com/cloudhead/node-static.git
+[submodule "vendor/mu"]
+	path = vendor/mu
+	url = git://github.com/raycmorgan/Mu.git

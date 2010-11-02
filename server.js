@@ -6,18 +6,21 @@ var fs = require('fs'),
     ws = require('node-websocket-server/lib/ws'),
     server = ws.createServer(),
     redis = require('redis-helper'),
-    mustache = require('mustache_js/mustache');
+    Mu = require('mu/lib/mu');
 
 var conns = new Array();
 var channels = new Array();
 
+Mu.templateRoot = './public';
+
 var config = fs.createReadStream('priv/config.js', {'encoding':'UTF-8'});
 config.addListener('data', function(data) {
   console.log('config: ' + data.toString('utf8'));
-  channels = eval(data.toString('utf8'));
-  if (channels) {
-    for(var i=0; i<channels.length; i++) {
-      exports.setup_channel(channels[i]);
+  var channel_list = eval(data.toString('utf8'));
+  if (channel_list) {
+    for(var i=0; i<channel_list.length; i++) {
+      channels.push({"name": channel_list[i]});
+      exports.setup_channel(channel_list[i]);
     }
   }
 });
@@ -31,7 +34,6 @@ exports.setup_channel = function(channel) {
 };
 
 exports.route_msg = function(channel, msg) {
-  console.log(channel + ": " + msg);
   for (var conn in conns[channel]) {
     console.log('sending ' + msg + ' to ' + conns[channel][conn].id);
     conns[channel][conn].write(msg);
@@ -66,19 +68,21 @@ exports.close_conn = function(conn_id) {
 
 server.listen(8080);
 
-var index = fs.createReadStream('public/index.html', {'encoding':'UTF-8'});
-var template = '';
-index.addListener('data', function(data) {
-  template = data.toString('utf8');
-});
-
 require('http').createServer(function (request, response) {
   var view = {
-    ws_host: 'localhost',
+    ws_host: process.env['LOCAL_IP'] || 'localhost',
     ws_port: 8080,
     instances: channels
   };
-  response.writeHead(200, {'Content-Type': 'text/html'});
-  response.sendBody(mustache.to_html(template, view));
-  response.finish();
+  Mu.render('index.html', view, {}, function (err, output) {
+    if (err) {
+      throw err;
+    }
+    var buffer = '';
+    output.addListener('data', function (c) {buffer += c; });
+    output.addListener('end', function () {
+      response.writeHead(200, {'Content-Type': 'text/html'});
+      response.end(buffer);
+    });
+  });
 }).listen(8001, "0.0.0.0");

@@ -2,7 +2,6 @@
   <head>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-      var _datapoints = new Array();
       google.load("visualization", "1", {packages:["imagesparkline"]});
       google.setOnLoadCallback(ready);
       
@@ -31,7 +30,7 @@
       function ready() {
         if ("WebSocket" in window) {
            {{#instances}}
-             open_sock('{{.}}');
+             open_sock('{{name}}');
            {{/instances}}
         } else {
            console.log("sorry, your browser does not support websockets.");
@@ -51,7 +50,7 @@
   </head>
   <body>
     {{#instances}}
-    <div id="{{.}}"></div>
+    <div id="{{name}}"></div>
     {{/instances}}
   </body>
 </html>
