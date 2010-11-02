@@ -6,43 +6,52 @@
       google.load("visualization", "1", {packages:["imagesparkline"]});
       google.setOnLoadCallback(ready);
       
+      function open_sock(channel) {
+        var ws = new WebSocket("ws://{{ws_host}}:{{ws_port}}");
+        var datapoints = new Array();
+        ws.onopen = function() {
+            console.log("websocket connected!");
+            ws.send(JSON.stringify({'channel': channel}));
+         };
+         ws.onmessage = function (evt) {
+            var receivedMsg = evt.data;
+            console.log('recvd ' + receivedMsg);
+            var num = eval(receivedMsg);
+            if (datapoints.length > 100) datapoints.shift();
+            datapoints.push({c:[{v: parseInt(num)}]});
+            drawChart(datapoints, channel);
+         };
+         ws.onclose = function() {
+            // websocket was closed
+            console.log("websocket was closed");
+         };
+        
+      }
+
       function ready() {
         if ("WebSocket" in window) {
-           // browser supports websockets
-           var ws = new WebSocket("ws://localhost:8080");
-           ws.onopen = function() {
-              console.log("websocket connected!");
-              ws.send(JSON.stringify({'channel': 'stats.foo'}));
-           };
-           ws.onmessage = function (evt) {
-              var receivedMsg = evt.data;
-              console.log('recvd ' + receivedMsg);
-              var num = eval(receivedMsg);
-              if (_datapoints.length > 100) _datapoints.shift();
-              _datapoints.push({c:[{v: parseInt(num)}]});
-              drawChart();
-           };
-           ws.onclose = function() {
-              // websocket was closed
-              console.log("websocket was closed");
-           };
+           {{#instances}}
+             open_sock('{{.}}');
+           {{/instances}}
         } else {
-           // browser does not support websockets
            console.log("sorry, your browser does not support websockets.");
         };
       }
       
-      function drawChart() {
+      function drawChart(rows, id) {
         var JSONObject = {
               cols: [{id: 'reqs', label: 'Requests', type: 'number'}],
-              rows: _datapoints };
-          var data = new google.visualization.DataTable(JSONObject, 0.5);
-        var chart = new google.visualization.ImageSparkLine(document.getElementById('chart_div'));
+              rows: rows
+        };
+        var data = new google.visualization.DataTable(JSONObject, 0.5);
+        var chart = new google.visualization.ImageSparkLine(document.getElementById(id));
         chart.draw(data, {width: 1000, height: 200, showAxisLines: true, showValueLabels: true, fill: true, min: 0});
       }
     </script>
   </head>
   <body>
-    <div id="chart_div"></div>
+    {{#instances}}
+    <div id="{{.}}"></div>
+    {{/instances}}
   </body>
 </html>

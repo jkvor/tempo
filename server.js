@@ -6,7 +6,7 @@ var fs = require('fs'),
     ws = require('node-websocket-server/lib/ws'),
     server = ws.createServer(),
     redis = require('redis-helper'),
-    static = require('node-static/lib/node-static');
+    mustache = require('mustache_js/mustache');
 
 var conns = new Array();
 
@@ -66,12 +66,19 @@ exports.close_conn = function(conn_id) {
 server.listen(8080);
 
 var index = fs.createReadStream('public/index.html', {'encoding':'UTF-8'});
-var html = '';
+var template = '';
 index.addListener('data', function(data) {
-  html = data.toString('utf8').replace("localhost", process.env['LOCAL_IP']);
+  template = data.toString('utf8');
 });
+
+var view = {
+  ws_host: 'localhost',
+  ws_port: 8080,
+  instances: []
+};
 
 require('http').createServer(function (request, response) {
   response.writeHead(200, {'Content-Type': 'text/html'});
-  response.end(html);
+  response.sendBody(mustache.to_html(template, view));
+  response.finish();
 }).listen(8001, "0.0.0.0");
