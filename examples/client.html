@@ -1,0 +1,36 @@
+<!--
+  $ ./redis_cli
+  redis> PUBLISH stats.foo "hello world"
+  (integer) 1
+-->
+<html>
+   <head>
+     <script type="text/javascript">
+         function ready(){
+            if ("WebSocket" in window) {
+               // browser supports websockets
+               var ws = new WebSocket("ws://localhost:8080");
+               ws.onopen = function() {
+                  // websocket is connected
+                  console.log("websocket connected!");
+                  // send hello data to server.
+                  ws.send(JSON.stringify({'channel': 'stats.foo'}));
+               };
+               ws.onmessage = function (evt) {
+                  var receivedMsg = evt.data;
+                  console.log("server sent the following: '" + receivedMsg + "'");
+               };
+               ws.onclose = function() {
+                  // websocket was closed
+                  console.log("websocket was closed");
+               };
+            } else {
+               // browser does not support websockets
+               console.log("sorry, your browser does not support websockets.");
+            }
+         }
+      </script>
+   </head>
+   <body onload="ready();">
+   </body>
+</html>

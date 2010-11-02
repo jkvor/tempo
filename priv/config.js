@@ -1,0 +1,1 @@
+['stats.foo', 'stats.bar']

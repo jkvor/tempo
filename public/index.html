@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      var _datapoints = new Array();
+      google.load("visualization", "1", {packages:["imagesparkline"]});
+      google.setOnLoadCallback(ready);
+      
+      function ready() {
+        if ("WebSocket" in window) {
+           // browser supports websockets
+           var ws = new WebSocket("ws://localhost:8080");
+           ws.onopen = function() {
+              console.log("websocket connected!");
+              ws.send(JSON.stringify({'channel': 'stats.foo'}));
+           };
+           ws.onmessage = function (evt) {
+              var receivedMsg = evt.data;
+              console.log('recvd ' + receivedMsg);
+              var num = eval(receivedMsg);
+              if (_datapoints.length > 100) _datapoints.shift();
+              _datapoints.push({c:[{v: parseInt(num)}]});
+              drawChart();
+           };
+           ws.onclose = function() {
+              // websocket was closed
+              console.log("websocket was closed");
+           };
+        } else {
+           // browser does not support websockets
+           console.log("sorry, your browser does not support websockets.");
+        };
+      }
+      
+      function drawChart() {
+        var JSONObject = {
+              cols: [{id: 'reqs', label: 'Requests', type: 'number'}],
+              rows: _datapoints };
+          var data = new google.visualization.DataTable(JSONObject, 0.5);
+        var chart = new google.visualization.ImageSparkLine(document.getElementById('chart_div'));
+        chart.draw(data, {width: 1000, height: 200, showAxisLines: false, showValueLabels: false, fill: true});
+      }
+    </script>
+  </head>
+  <body>
+    <div id="chart_div"></div>
+  </body>
+</html>
