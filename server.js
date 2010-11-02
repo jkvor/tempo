@@ -12,7 +12,8 @@ var conns = new Array();
 
 var config = fs.createReadStream('priv/config.js', {'encoding':'UTF-8'});
 config.addListener('data', function(data) {
-  var channels = eval(data);
+  console.log('config: ' + data.toString('utf8'));
+  var channels = eval(data.toString('utf8'));
   if (channels) {
     for(var i=0; i<channels.length; i++) {
       exports.setup_channel(channels[i]);
@@ -64,9 +65,13 @@ exports.close_conn = function(conn_id) {
 
 server.listen(8080);
 
-var file = new(static.Server)('./public');
+var index = fs.createReadStream('public/index.html', {'encoding':'UTF-8'});
+var html = '';
+index.addListener('data', function(data) {
+  html = data.toString('utf8').replace("localhost", process.env['LOCAL_IP']);
+});
+
 require('http').createServer(function (request, response) {
-    request.addListener('end', function () {
-        file.serve(request, response);
-    });
-}).listen(8001);
+  response.writeHead(200, {'Content-Type': 'text/html'});
+  response.end(html);
+}).listen(8001, "0.0.0.0");

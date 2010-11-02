@@ -38,7 +38,7 @@
               rows: _datapoints };
           var data = new google.visualization.DataTable(JSONObject, 0.5);
         var chart = new google.visualization.ImageSparkLine(document.getElementById('chart_div'));
-        chart.draw(data, {width: 1000, height: 200, showAxisLines: false, showValueLabels: false, fill: true});
+        chart.draw(data, {width: 1000, height: 200, showAxisLines: true, showValueLabels: true, fill: true, min: 0});
       }
     </script>
   </head>
