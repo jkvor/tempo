@@ -9,11 +9,12 @@ var fs = require('fs'),
     mustache = require('mustache_js/mustache');
 
 var conns = new Array();
+var channels = new Array();
 
 var config = fs.createReadStream('priv/config.js', {'encoding':'UTF-8'});
 config.addListener('data', function(data) {
   console.log('config: ' + data.toString('utf8'));
-  var channels = eval(data.toString('utf8'));
+  channels = eval(data.toString('utf8'));
   if (channels) {
     for(var i=0; i<channels.length; i++) {
       exports.setup_channel(channels[i]);
@@ -71,13 +72,12 @@ index.addListener('data', function(data) {
   template = data.toString('utf8');
 });
 
-var view = {
-  ws_host: 'localhost',
-  ws_port: 8080,
-  instances: []
-};
-
 require('http').createServer(function (request, response) {
+  var view = {
+    ws_host: 'localhost',
+    ws_port: 8080,
+    instances: channels
+  };
   response.writeHead(200, {'Content-Type': 'text/html'});
   response.sendBody(mustache.to_html(template, view));
   response.finish();
