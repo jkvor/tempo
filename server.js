@@ -10,6 +10,7 @@ var fs = require('fs'),
 
 var conns = new Array();
 var channels = new Array();
+var cache = new Array();
 
 Mu.templateRoot = './public';
 
@@ -24,7 +25,7 @@ config.addListener('data', function(data) {
   var channel_list = eval(data.toString('utf8'));
   if (channel_list) {
     for(var i=0; i<channel_list.length; i++) {
-      channels.push({"name": channel_list[i]});
+      channels.push({"name": channel_list[i], "label": channel_list[i].replace('stats.', '')});
       exports.setup_channel(channel_list[i]);
     }
   }
@@ -33,6 +34,7 @@ config.addListener('data', function(data) {
 exports.setup_channel = function(channel) {
   console.log("init channel: " + channel);
   conns[channel] = new Array();
+  cache[channel] = new Array();
   redis.subscribe(channel, function(msg) {
     exports.route_msg(channel, msg);
   });
@@ -41,6 +43,8 @@ exports.setup_channel = function(channel) {
 exports.route_msg = function(channel, msg) {
   for (var conn in conns[channel]) {
     console.log('sending ' + msg + ' to ' + conns[channel][conn].id);
+    if (cache[channel].length > 100) cache[channel].shift();
+    cache[channel].push(msg);
     conns[channel][conn].write(msg);
   }
 };
@@ -79,7 +83,8 @@ require('http').createServer(function (request, response) {
     var view = {
       ws_host: process.env['LOCAL_IP'] || 'localhost',
       ws_port: 8080,
-      instances: channels
+      instances: channels,
+      cache: cache
     };
     Mu.render('index.html', view, {}, function (err, output) {
       if (err) {
