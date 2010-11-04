@@ -48,7 +48,8 @@
   </head>
   <body>
     {{#instances}}
-    <canvas id="{{name}}" width="1000" height="150">[No canvas support]</canvas> 
+    {{name}}
+    <canvas id="{{name}}" width="1000" height="150" style="margin-left: 10px;">[No canvas support]</canvas> 
     {{/instances}}
   </body>
 </html>

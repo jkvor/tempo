@@ -69,20 +69,33 @@ exports.close_conn = function(conn_id) {
 server.listen(8080);
 
 require('http').createServer(function (request, response) {
-  var view = {
-    ws_host: process.env['LOCAL_IP'] || 'localhost',
-    ws_port: 8080,
-    instances: channels
-  };
-  Mu.render('index.html', view, {}, function (err, output) {
-    if (err) {
-      throw err;
-    }
-    var buffer = '';
-    output.addListener('data', function (c) {buffer += c; });
-    output.addListener('end', function () {
-      response.writeHead(200, {'Content-Type': 'text/html'});
-      response.end(buffer);
+  console.log(request.url);
+  if (request.url == '/') {
+    var view = {
+      ws_host: process.env['LOCAL_IP'] || 'localhost',
+      ws_port: 8080,
+      instances: channels
+    };
+    Mu.render('index.html', view, {}, function (err, output) {
+      if (err) {
+        throw err;
+      }
+      var buffer = '';
+      output.addListener('data', function (c) {buffer += c; });
+      output.addListener('end', function () {
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        response.end(buffer);
+      });
     });
-  });
+  } else if (request.url.match(/\.js$/) != null) {
+    console.log('read public' + request.url);
+    var file = fs.createReadStream('public' + request.url, {'encoding':'UTF-8'});
+    response.writeHead(200, {'Content-Type': 'text/javascript'});
+    file.addListener('data', function(data) {
+      response.write(data.toString('utf8'));
+    });
+    file.addListener('end', function() {
+      response.end();
+    });
+  }
 }).listen(8001, "0.0.0.0");
