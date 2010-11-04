@@ -14,6 +14,11 @@ var channels = new Array();
 Mu.templateRoot = './public';
 
 var config = fs.createReadStream('priv/config.js', {'encoding':'UTF-8'});
+config.addListener('error', function(err) {
+  console.log('failed to read priv/config.js');
+  process.exit(1);
+});
+
 config.addListener('data', function(data) {
   console.log('config: ' + data.toString('utf8'));
   var channel_list = eval(data.toString('utf8'));
