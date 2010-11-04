@@ -24,10 +24,10 @@
          ws.onmessage = function (evt) {
             var receivedMsg = evt.data;
             var json = JSON.parse(receivedMsg);
-            if (requests.length > 100) requests.shift();
+            if (requests.length > 300) requests.shift();
             requests.push(parseInt(json.requests ? json.requests : 0));
             document.getElementById(channel + "_num_requests").innerHTML = json.requests;
-            if (errors.length > 100) errors.shift();
+            if (errors.length > 300) errors.shift();
             errors.push(parseInt(json.errors ? json.errors : 0));
             document.getElementById(channel + "_num_errors").innerHTML = json.errors;
             drawChart(channel, requests, errors);
