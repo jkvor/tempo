@@ -7,7 +7,7 @@
       window.onload = function () {
         if ("WebSocket" in window) {
            {{#channels}}
-             open_sock('{{name}}', [{{#data}}{"requests": {{requests}}, "errors": {{errors}}},{{/data}}]);
+             open_sock('{{name}}', []);
            {{/channels}}
         } else {
            console.log("sorry, your browser does not support websockets.");
@@ -17,12 +17,13 @@
       function open_sock(channel, datapoints) {
         var requests = new Array();
         var errors = new Array();
-        for(datapoint in datapoints) {
+        /*for(datapoint in datapoints) {
           requests.push(datapoints[datapoint].requests);
           errors.push(datapoints[datapoint].errors);
         }
         if (requests.length > 0)
           drawChart(channel, requests, errors);
+        */
 
         var ws = new WebSocket("ws://{{ws_host}}:{{ws_port}}");
         ws.onopen = function() {
