@@ -7,23 +7,15 @@
       window.onload = function () {
         if ("WebSocket" in window) {
            {{#channels}}
-             open_sock('{{name}}', [{{#data}}{"requests": {{requests}}, "errors": {{errors}}},{{/data}}]);
+             open_sock('{{name}}', {{data}});
            {{/channels}}
         } else {
            console.log("sorry, your browser does not support websockets.");
         };
       }
  
-      function open_sock(channel, datapoints) {
-        var requests = new Array();
-        var errors = new Array();
-        for(datapoint in datapoints) {
-          requests.push(datapoints[datapoint].requests);
-          errors.push(datapoints[datapoint].errors);
-        }
-        if (requests.length > 0)
-          drawChart(channel, requests, errors);
-
+      function open_sock(channel, data) {
+        var labels_div = document.getElementById(channel + '_labels');
         var ws = new WebSocket("ws://{{ws_host}}:{{ws_port}}");
         ws.onopen = function() {
             console.log("websocket connected!");
@@ -32,13 +24,20 @@
          ws.onmessage = function (evt) {
             var receivedMsg = evt.data;
             var json = JSON.parse(receivedMsg);
-            if (requests.length > cache_length) requests.shift();
-            requests.push(parseInt(json.requests ? json.requests : 0));
-            document.getElementById(channel + "_num_requests").innerHTML = json.requests;
-            if (errors.length > cache_length) errors.shift();
-            errors.push(parseInt(json.errors ? json.errors : 0));
-            document.getElementById(channel + "_num_errors").innerHTML = json.errors;
-            drawChart(channel, requests, errors);
+            labels_div.innerHTML = '';
+            var index = 0;
+            for(foo in json) {
+              if(data[index] == undefined) {
+                data[index] = new Array(); 
+              } else {
+                if (data[index].length > cache_length)
+                  data[index].shift();
+              }
+              labels_div.innerHTML += (foo + ': ' + json[foo] + '/sec<br/>');
+              data[index].push(json[foo]); 
+              index++;
+            } 
+            drawChart(channel, data);
          };
          ws.onclose = function() {
             // websocket was closed
@@ -46,9 +45,12 @@
          };
       }
 
-      function drawChart(id, data1, data2) {
+      function drawChart(id, data) {
         RGraph.Clear(document.getElementById(id));
-        var line = new RGraph.Line(id, data1, data2);
+        var line = new RGraph.Line(id);
+        for (var i=0; i<data.length; i++) {
+            line.original_data[i] = RGraph.array_clone(data[i]);
+        }
         line.Set('chart.hmargin', 5);
         line.Set('chart.noaxes', true);
         line.Set('chart.backdrop', true);
@@ -63,13 +65,14 @@
   </head>
   <body>
     {{#channels}}
-    <canvas id="{{name}}" width="1000" height="150" style="float: left; margin: 0px; padding: 0px;">[No canvas support]</canvas>
-    <div style="float: left;">
-      <div style="margin-top: 20px; font-size: 1.4em; color: BLUE;">{{label}}</div>
-      <div style="margin-top: 2px; font-size: 1.6em; color: GREEN;"><span id="{{name}}_num_requests"></span> req/s</div>
-      <div style="margin-top: 2px; font-size: 1.6em; color: RED;"><span id="{{name}}_num_errors"></span> err/s</div>
+    <div>
+      <canvas id="{{name}}" width="1000" height="150" style="float: left; margin: 0px; padding: 0px;">[No canvas support]</canvas>
+      <div style="float: right;">
+        <div style="margin-top: 20px; font-size: 1.4em; color: BLUE;">{{label}}</div>
+        <div id="{{name}}_labels" style="margin-top: 2px; font-size: 1.2em; color: BLUE;"></div>
+      </div>
+      <div style="clear: both;"></div>
     </div>
-    <div style="clear: both;"></div>
     {{/channels}}
   </body>
 </html>
