@@ -71,6 +71,24 @@ exports.channel_sub = function(channel_obj) {
   return channel_raw;
 };
 
+exports.decodeBase64 = function(headerValue)
+{
+    var value;
+    if (value = headerValue.match("^Basic\\s([A-Za-z0-9+/=]+)$"))
+    {
+        var auth = (new Buffer(value[1] || "", "base64")).toString("ascii");
+        return {
+            username : auth.slice(0, auth.indexOf(':')),
+            password : auth.slice(auth.indexOf(':') + 1, auth.length)
+        };
+    }
+    else
+    {
+        return null;
+    }
+
+};
+
 server.listen(websocket_port);
 
 require('http').createServer(function (request, response) {
@@ -86,6 +104,18 @@ require('http').createServer(function (request, response) {
       response.end();
     });
   } else if (request.url.match(/^\/[\w\d]+$/) != null) {
+    if (!request.headers['authorization']) {
+      response.writeHead(401, {'WWW-Authenticate': 'Basic realm="Secure Area"'});
+      response.end();
+      return;
+    } else {
+      var auth = exports.decodeBase64(request.headers['authorization']);
+      if (!auth || !auth.username || auth.password != process.env['TEMPO_PASSWORD']) {
+        response.writeHead(401, {'WWW-Authenticate': 'Basic realm="Secure Area"'});
+        response.end();
+        return;
+      }
+    }
     var instance = request.url.substring(1, request.url.length);
     db.keys(domain + ':stats:' + instance + ':*', function(err, channel_list) {
       if(err) throw err;
