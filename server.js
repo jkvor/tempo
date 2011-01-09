@@ -60,12 +60,14 @@ exports.channel_sub = function(channel_obj) {
   var channel_raw = split[split.length-1];
   var channel_name = 'stats.' + channel_raw;
   console.log("init channel: " + channel_name);
-  conns[channel_name] = new Array();
+  if(conns[channel_name] == undefined) {
+    conns[channel_name] = new Array();
+    redis.subscribe(channel_name, function(msg) {
+      exports.route_msg(channel_name, msg);
+    });
+  }
   if(cache[channel_name] == undefined)
     cache[channel_name] = new Array();  
-  redis.subscribe(channel_name, function(msg) {
-    exports.route_msg(channel_name, msg);
-  });
   return channel_raw;
 };
 
