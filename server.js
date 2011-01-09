@@ -4,7 +4,7 @@ require.paths.unshift(__dirname + '/vendor/');
 var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
-    ws = require('node-websocket-server/lib/ws'),
+    ws = require('node-websocket-server/lib/ws/server'),
     server = ws.createServer(),
     redis = require('redis-helper'),
     db = redis.connection,
