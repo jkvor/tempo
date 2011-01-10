@@ -91,17 +91,6 @@ exports.decodeBase64 = function(headerValue)
 
 server.listen(websocket_port);
 
-process.on('uncaughtException', function (err) {
-  if(err.message == 'ETIMEDOUT, Connection timed out') {
-    sys.debug(err);
-    conns = new Array();
-  } else {
-    if (err.stack) sys.debug(err.stack);
-    else sys.debug(err);
-    process.exit(1);
-  }
-});
-
 require('http').createServer(function (request, response) {
   console.log(request.url);
   if (request.url.match(/\.js$/) != null) {
