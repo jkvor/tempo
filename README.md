@@ -3,7 +3,7 @@
 #### Socket Server
 
     REDIS_URL 
-    WEBSOCKET_PORT
+    PORT 
     HEROKU_DOMAIN
 
 #### Web Server

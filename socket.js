@@ -9,8 +9,7 @@ var fs = require('fs'),
     db = redis.connection,
     Mu = require('mustache/index');
 
-var websocket_port = parseInt(process.env['WEBSOCKET_PORT'] || '8080');
-var http_port = parseInt(process.env['PORT'] || '8001');
+var websocket_port = parseInt(process.env['PORT'] || '8080');
 var domain = process.env['HEROKU_DOMAIN'] || '';
 var conns = new Array();
 var subscriptions = new Array();
@@ -26,6 +25,7 @@ canvas_stream.addListener('data', function(data) {
 
 server.addListener("connection", function(conn){
   conn.addListener("message", function(msg) {
+    console.log("msg: " + msg.toString());
     var json = JSON.parse(msg);
     if (json.command == "open") {
       exports.open_conn(json.instance, conn);
@@ -99,4 +99,5 @@ exports.route_msg = function(instance, channel, msg) {
   }
 };
 
+console.log("listen on " + websocket_port);
 server.listen(websocket_port);
