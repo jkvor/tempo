@@ -1,3 +1,20 @@
+### Env Vars
+
+#### Socket Server
+
+  REDIS_URL 
+  WEBSOCKET_PORT
+  HEROKU_DOMAIN
+
+#### Web Server
+
+  PORT
+  WEBSOCKET_HOST
+  WEBSOCKET_PORT
+  TEMPO_PASSWORD
+  
+### License
+
 Copyright (c) 2010 Jacob Vorreuter <jacob.vorreuter@gmail.com>
 
 Permission is hereby granted, free of charge, to any person

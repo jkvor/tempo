@@ -6,6 +6,7 @@ var fs = require('fs'),
     Mu = require('mustache/index');
 
 var http_port = parseInt(process.env['PORT'] || '8001');
+var websocket_host = process.env['WEBSOCKET_HOST'] || 'localhost';
 var websocket_port = parseInt(process.env['WEBSOCKET_PORT'] || '8080');
 var tempo_password = process.env['TEMPO_PASSWORD'] || 'password';
 
@@ -55,7 +56,7 @@ require('http').createServer(function (request, response) {
     }
     var instance = request.url.substring(1, request.url.length);
     var view = {
-      ws_host: process.env['LOCAL_IP'] || 'localhost',
+      ws_host: websocket_host,
       ws_port: websocket_port,
       instance: instance
     };
