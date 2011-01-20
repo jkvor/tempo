@@ -1,14 +1,14 @@
 require.paths.unshift(__dirname + '/lib');
-require.paths.unshift(__dirname + '/vendor/');
+require.paths.unshift(__dirname + '/node_modules/');
 
 var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
-    ws = require('node-websocket-server/lib/ws/server'),
+    ws = require('websocket-server/server'),
     server = ws.createServer(),
     redis = require('redis-helper'),
     db = redis.connection,
-    Mu = require('mu/lib/mu');
+    Mu = require('mustache/index');
 
 var websocket_port = parseInt(process.env['WEBSOCKET_PORT'] || '8080');
 var http_port = parseInt(process.env['PORT'] || '8001');
@@ -18,9 +18,16 @@ var channels = new Array();
 var cache = new Array();
 var cache_length = 300;
 
-Mu.templateRoot = './public';
+//Mu.templateRoot = './public';
+var index_stream = fs.createReadStream('public/index.html.mu', {'encoding':'UTF-8'});
+var index_template;
+index_stream.addListener('data', function(data) {
+  index_template = data.toString('utf8');
+});
+
 
 exports.route_msg = function(channel, msg) {
+  console.log(msg.toString());
   if (cache[channel].length > cache_length) cache[channel].shift();
   cache[channel].push(JSON.parse(msg));
   for (var conn in conns[channel]) {
@@ -118,7 +125,11 @@ require('http').createServer(function (request, response) {
     }
     var instance = request.url.substring(1, request.url.length);
     db.keys(domain + ':stats:' + instance + ':*', function(err, channel_list) {
-      if(err) throw err;
+      if(err || channel_list == null) {
+        response.writeHead(500, {});
+        response.end(sys.inspect(err));
+        return;
+      }  
       var datapoints = new Array();
       for(var i=0; i<channel_list.length; i++) {
         var channel_raw = exports.channel_sub(channel_list[i]);
@@ -140,17 +151,8 @@ require('http').createServer(function (request, response) {
         ws_port: websocket_port,
         channels: datapoints
       };
-      Mu.render('index.html', view, {}, function (err, output) {
-        if (err) {
-          throw err;
-        }
-        var buffer = '';
-        output.addListener('data', function (c) {buffer += c; });
-        output.addListener('end', function () {
-          response.writeHead(200, {'Content-Type': 'text/html'});
-          response.end(buffer);
-        });
-      });
+      response.writeHead(200, {'Content-Type': 'text/html'});
+      response.end(Mu.to_html(index_template, view));
     });
   } else {
     response.writeHead(404, {'Content-Type': 'text/html'});

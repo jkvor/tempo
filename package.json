@@ -1,0 +1,10 @@
+{
+  "name": "tempo",
+  "version": "0.0.1",
+  "dependencies": {
+    "node-static": "0.5.3",
+    "websocket-server": "1.4.01",
+    "redis": "0.3.0",
+    "mustache": "0.3.1-dev"
+  }
+}
