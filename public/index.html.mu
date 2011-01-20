@@ -6,38 +6,47 @@
       var cache_length = 300;
       window.onload = function () {
         if ("WebSocket" in window) {
-           {{#channels}}
-             open_sock('{{name}}', {{data}});
-           {{/channels}}
+           open_sock('{{instance}}');
         } else {
            console.log("sorry, your browser does not support websockets.");
         };
       }
  
-      function open_sock(channel, data) {
-        var labels_div = document.getElementById(channel + '_labels');
+      function open_sock(instance) {
         var ws = new WebSocket("ws://{{ws_host}}:{{ws_port}}");
+        var datasets = new Array();
         ws.onopen = function() {
             console.log("websocket connected!");
-            ws.send(JSON.stringify({'channel': channel}));
+            ws.send(JSON.stringify({'command': 'open', 'instance': instance}));
          };
          ws.onmessage = function (evt) {
             var receivedMsg = evt.data;
             var json = JSON.parse(receivedMsg);
-            labels_div.innerHTML = '';
-            var index = 0;
-            for(foo in json) {
-              if(data[index] == undefined) {
-                data[index] = new Array(); 
-              } else {
-                if (data[index].length > cache_length)
-                  data[index].shift();
+            if (json.command == "init") {
+              datasets[json.channel] = new Array();
+              var newdiv = document.createElement("div");
+              newdiv.innerHTML = json.html
+              document.body.appendChild(newdiv);
+            } else {
+              var channel = json.channel;
+              var labels_div = document.getElementById(channel + '_labels');
+              labels_div.innerHTML = '';
+              var index = 0;
+              for(foo in json) {
+                if(foo != "channel") {
+                  if(datasets[channel][index] == undefined) {
+                    datasets[channel][index] = new Array(); 
+                  } else {
+                    if (datasets[channel][index].length > cache_length)
+                      datasets[channel][index].shift();
+                  }
+                  labels_div.innerHTML += (foo + ': ' + json[foo] + '/sec<br/>');
+                  datasets[channel][index].push(json[foo]); 
+                  index++;
+                }
               }
-              labels_div.innerHTML += (foo + ': ' + json[foo] + '/sec<br/>');
-              data[index].push(json[foo]); 
-              index++;
-            } 
-            drawChart(channel, data);
+              drawChart(channel, datasets[channel]);
+            }
          };
          ws.onclose = function() {
             // websocket was closed
@@ -64,15 +73,5 @@
     </script>
   </head>
   <body>
-    {{#channels}}
-    <div>
-      <canvas id="{{name}}" width="1000" height="150" style="float: left; margin: 0px; padding: 0px;">[No canvas support]</canvas>
-      <div style="float: left; margin-left: 10px;">
-        <div style="margin-top: 20px; font-size: 1.4em; color: BLUE;">{{label}}</div>
-        <div id="{{name}}_labels" style="margin-top: 2px; font-size: 1.2em; color: BLUE;"></div>
-      </div>
-      <div style="clear: both;"></div>
-    </div>
-    {{/channels}}
   </body>
 </html>
