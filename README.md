@@ -1,3 +1,7 @@
+### Installing dependencies
+
+    $ npm bundle
+
 ### Env Vars
 
 #### Socket Server
