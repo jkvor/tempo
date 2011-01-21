@@ -29,6 +29,8 @@ exports.decodeBase64 = function(headerValue) {
     }
 };
 
+console.log("bind to port " + http_port);
+
 require('http').createServer(function (request, response) {
   console.log(request.url);
   if (request.url.match(/\.js$/) != null) {
