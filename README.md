@@ -2,6 +2,16 @@
 
     $ npm bundle
 
+### Run locally
+
+* Start a local redis server
+
+    $ ./redis-server
+
+* Start tempo using foreman (gem install foreman if necessary)
+
+    $ foreman start -p 7980
+
 ### Env Vars
 
 #### Socket Server
