@@ -99,5 +99,9 @@ exports.route_msg = function(instance, channel, msg) {
   }
 };
 
-console.log("listen on " + websocket_port);
+console.log("domain " + domain);
+console.log("websocket port " + websocket_port);
+db.ping(function(msg, err) {
+    console.log("redis ping " + msg + ", " + err);
+});
 server.listen(websocket_port);
