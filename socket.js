@@ -15,7 +15,7 @@ var conns = new Array();
 var subscriptions = new Array();
 var channels = new Array();
 var cache = new Array();
-var cache_length = 300;
+var cache_length = parseInt(process.env['CACHE_LENGTH'] ||  '50');
 
 var canvas_stream = fs.createReadStream('public/canvas.html.mu', {'encoding':'UTF-8'});
 var canvas_template;
