@@ -4,7 +4,7 @@ require.paths.unshift('./node_modules');
 var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
-    Mu = require('mustache/index');
+    Mu = require('mustache/mustache');
 
 var http_port = parseInt(process.env['PORT'] || '8001');
 var websocket_host = process.env['WEBSOCKET_HOST'] || 'localhost';

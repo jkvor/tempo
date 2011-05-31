@@ -8,7 +8,7 @@ var fs = require('fs'),
     server = ws.createServer(),
     redis = require('redis-helper'),
     db = redis.connection,
-    Mu = require('mustache/index');
+    Mu = require('mustache/mustache');
 
 var websocket_port = parseInt(process.env['PORT'] || '8080');
 var domain = process.env['HEROKU_DOMAIN'] || '';
