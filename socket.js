@@ -1,5 +1,6 @@
 require.paths.unshift(__dirname + '/lib');
 require.paths.unshift(__dirname + '/node_modules/');
+require.paths.unshift('./node_modules');
 
 var fs = require('fs'),
     sys = require('sys'),
