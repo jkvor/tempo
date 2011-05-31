@@ -4,7 +4,7 @@ require.paths.unshift('./node_modules');
 
 var fs = require('fs'),
     sys = require('sys'),
-    ws = require('websocket-server/server'),
+    ws = require('websocket-server/lib/ws/server'),
     server = ws.createServer(),
     redis = require('redis-helper'),
     db = redis.connection,
