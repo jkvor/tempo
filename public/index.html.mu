@@ -67,7 +67,7 @@
         line.Set('chart.backdrop.alpha', 0.5);
         line.Set('chart.linewidth', 2);
         line.Set('chart.ylabels.inside', true);
-        line.Set('chart.colors', ['GREEN', 'RED']);
+        line.Set('chart.colors', ['GREEN', 'RED', 'BLUE', 'PURPLE', 'ORANGE', 'YELLOW']);
         line.Draw();
       }
     </script>
